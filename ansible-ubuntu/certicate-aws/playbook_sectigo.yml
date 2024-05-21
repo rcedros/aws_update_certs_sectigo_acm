@@ -12,13 +12,13 @@
 - hosts: localhost
 
   vars:
-    vault_url: "https://vaultdev.in.neoncorp.com.br:8200/"
+    vault_url: "https://vaultdev.com.br:8200/"
     vault_path: "sec-certificates/data/"
     sectigo_enroll: "https://cert-manager.com/api/ssl/v1/enroll"
     sectigo_approve: "https://cert-manager.com/api/ssl/v1/approve/"
     sectigo_collect: "https://cert-manager.com/api/ssl/v1/collect/"
     sectigo_profile: 3940
-    sectigo_cert: "apps-hml.neon.com.br"
+    sectigo_cert: "certificate.com.br"
 
 
   vars_files:
