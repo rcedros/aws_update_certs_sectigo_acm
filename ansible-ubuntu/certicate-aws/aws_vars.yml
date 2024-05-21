@@ -1,10 +1,10 @@
 ---
 roles_arns:
-  - arn:aws:iam::003353406932:role/AwsRoleHmlAccount
-  - arn:aws:iam::661334312107:role/AwsRoleDevAccount  
+  - arn:aws:iam::11111111111:role/AwsRoleHmlAccount
+  - arn:aws:iam::22222222222:role/AwsRoleDevAccount  
 role_session_name: my-role-session
 aws_region: us-east-2
 domain_name: push.neon.com.br
 # vault_url: "https://vaultdev.in.neoncorp.com.br:8200/"
 # vault_path: "sec-certificates/data/"
-# domain_name: "pbx.neon.com.br"
+# domain_name: "certificate.com.br"
