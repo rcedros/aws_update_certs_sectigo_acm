@@ -1,0 +1,12 @@
+---
+- name: "Retrieve certificate in Vault"
+  community.hashi_vault.vault_read:
+    url: "{{ vault_url }}"
+    path: "{{ vault_path }}{{ domain_name }}"
+    auth_method: ldap
+    username: "{{ vault_user }}"
+    password: "{{ vault_password }}"
+  become: no
+  delegate_to: localhost
+  register: secret
+  no_log: true

@@ -1,0 +1,3 @@
+---
+vault_url: "https://vaultdev.in.neoncorp.com.br:8200/"
+vault_path: "sec-certificates/data/"

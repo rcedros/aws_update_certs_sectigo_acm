@@ -1,0 +1,119 @@
+# AWS playbook
+---
+
+# 1 - gerar a csr com o nome da aplicação a ser atualizada. 
+# 2 - salvar no vault a csr e a chave privada
+# 3 - gerar o certificado via sectigo salvá-lo no vault.
+# 4 - atualizar ou fazer o upload do certificado via tag name no acm
+# 5 - Criar o rollback dos certificados.
+
+#profile SSL - Wildcard: 3944, SSL Público: 3940, SSL privado: 3946
+
+- hosts: localhost
+
+  vars:
+    vault_url: "https://vaultdev.in.neoncorp.com.br:8200/"
+    vault_path: "sec-certificates/data/"
+    sectigo_enroll: "https://cert-manager.com/api/ssl/v1/enroll"
+    sectigo_approve: "https://cert-manager.com/api/ssl/v1/approve/"
+    sectigo_collect: "https://cert-manager.com/api/ssl/v1/collect/"
+    sectigo_profile: 3940
+    sectigo_cert: "apps-hml.neon.com.br"
+
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Generate an OpenSSL private key with the default values (2048 bits, RSA)
+      community.crypto.openssl_privatekey_pipe:
+        content: "{{ sectigo_cert }}"
+        size: 2048
+        format: pkcs8
+      register: "{{ privkey }}"
+
+    - name: Generate an OpenSSL Certificate Signing Request
+      community.crypto.openssl_csr_pipe:
+        privatekey_content: "{{ privkey.privatekey }}"
+        common_name: "{{ sectigo_cert }}"
+      register: "{{ csr }}"
+
+    - name: Enroll SSL certificate Sectigo
+      uri:
+        url: "{{ sectigo_enroll }}"
+        method: POST
+        headers:
+          Content-Type: application/json
+          login: "{{ sectigo_login }}"
+          password: "{{ sectigo_password }}"
+          customerUri: neon
+        body_format: json
+        body:
+          orgId: 10750
+          subjAltNames: "{{ sectigo_cert }}"
+          certType: "{{ sectigo_profile }}"
+          term: 365
+          comments: issued by Ansible
+          externalRequester:
+          csr: "{{ csr.csr }}"
+      register: reqcert
+
+    - name: Approve SSL certificate
+      uri:
+        url: "{{ sectigo_approve }}{{ reqcert['json']['sslId'] }}"
+        method: POST
+        headers:
+          Content-Type: application/json
+          login: "{{ sectigo_login }}"
+          password: "{{ sectigo_password }}"
+          customerUri: neon
+        body_format: json
+        body:
+          message: issued by Ansible
+      register: issued
+      failed_when: issued.status != 204
+      retries: 3
+      delay: 15
+      until: issued is not failed
+
+    - name: Collect SSL certificate
+      uri:
+        url: "{{ sectigo_collect }}{{ reqcert['json']['sslId'] }}?format=x509CO"
+        method: GET
+        headers:
+          login: "{{ sectigo_login }}"
+          password: "{{ sectigo_password }}"
+          customerUri: neon
+        return_content: true
+      register: pubkey
+      retries: 3
+      delay: 5
+      until: pubkey is not failed
+
+    - name: Collect SSL certificate
+      uri:
+        url: "{{ sectigo_collect }}{{ reqcert['json']['sslId'] }}?format=x509IOR"
+        method: GET
+        headers:
+          login: "{{ sectigo_login }}"
+          password: "{{ sectigo_password }}"
+          customerUri: neon
+        return_content: true
+      register: chain_ca
+      retries: 3
+      delay: 5
+      until: chain_ca is not failed
+
+    - name: Write secret to Vault using key value V2 engine
+      community.hashi_vault.vault_write:
+        url: "{{ vault_url }}"
+        path: "{{vault_path}}{{ sectigo_cert_name }}"
+        auth_method: ldap
+        username: "{{ vault_user }}"
+        password: "{{ vault_password }}"
+        data:
+          data:
+            public_key: "{{ pubkey.content }}"
+            private_key: "{{ privkey.privatekey }}"
+            csr: "{{ csr.csr }}"
+            chain: "{{ chain_ca.content }}"

@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+
+  gather_facts: no
+
+  vars_files:
+    - vault.yml
+    - aws_vars.yml
+
+  tasks:
+    - name: get certs
+      include_tasks: aws_update_certificate.yml
+      loop: "{{ roles_arns }}"

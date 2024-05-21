@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars_files:
+    - inventario/vars_aws.yml
+    - inventario/vars_vault.yml
+    - inventario/vault.yml
+  roles:
+    - role: aws_get_certificate
+      tags:
+        - certs
+
+    # - role: aws_update_certificate
+    #   tags:
+    #     - update_certs

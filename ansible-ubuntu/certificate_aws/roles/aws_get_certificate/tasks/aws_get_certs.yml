@@ -1,0 +1,16 @@
+---
+- name: Assume role
+  include_role:
+    name: aws_assume_role
+    tasks_from: main.yml
+
+- name: Verify certs ACM certificate in all accounts
+  community.aws.aws_acm_info:
+    aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
+    aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+    security_token: "{{ assumed_role.sts_creds.session_token }}"
+    domain_name: "{{ domain_name }}"
+    tags:
+      Name: "{{ domain_name }}"
+    region: "{{ aws_region }}"
+  "{{assumed_role.sts_user}}"

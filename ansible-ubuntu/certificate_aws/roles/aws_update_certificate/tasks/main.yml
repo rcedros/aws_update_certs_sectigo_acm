@@ -1,0 +1,7 @@
+---
+- name: get certificate in vault
+  include_tasks: roles/aws_vault_get_certificate/tasks/main.yml
+
+- name: update certificates
+  include_tasks: roles/aws_update_certificate/tasks/aws_update_certs.yml
+  loop: "{{ roles_arns }}"

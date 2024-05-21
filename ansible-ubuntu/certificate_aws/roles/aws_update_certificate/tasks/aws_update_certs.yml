@@ -1,0 +1,30 @@
+---
+- name: Assume role
+  include_role:
+    name: aws_assume_role
+    tasks_from: main.yml
+
+- name: Verify certs ACM certificate in all accounts
+  community.aws.aws_acm_info:
+    aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
+    aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+    security_token: "{{ assumed_role.sts_creds.session_token }}"
+    domain_name: "{{ domain_name }}"
+    tags:
+      Name: "{{ domain_name }}"
+    region: "{{ aws_region }}"
+  register: result
+
+- name: Create/update a certificate with a chain aws account
+  community.aws.aws_acm:
+    aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
+    aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+    security_token: "{{ assumed_role.sts_creds.session_token }}"
+    certificate: "{{ secret.data.data.data.public_key }}"
+    private_key: "{{ secret.data.data.data.private_key }}"
+    name_tag: "{{ domain_name }}"
+    certificate_chain: "{{ secret.data.data.data.chain }}"
+    region: "{{ aws_region }}"
+    state: present
+  register: cert_create
+  when: result.certificates != []
