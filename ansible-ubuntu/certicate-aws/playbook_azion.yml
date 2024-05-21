@@ -21,7 +21,7 @@
 
     - name: "Recuperando credencial no Vault"
       community.hashi_vault.vault_read:
-        url: "https://vaultdev.in.neoncorp.com.br:8200/"
+        url: "https://vault.com.br:8200/"
         path: "{{vault_path}}{{ secret_name }}"
         auth_method: ldap
         username: "{{ vault_user }}"
