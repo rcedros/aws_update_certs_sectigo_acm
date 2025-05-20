@@ -4,4 +4,4 @@ roles_arns:
   - arn:aws:iam::000000000000:role/AwsRoleDevAccount 
 role_session_name: sec-role
 aws_region: us-east-2
-domain_name: "aplicacao.neon.com.br"
+domain_name: "certificate.com"
