@@ -1,6 +1,5 @@
 ---
 - hosts: localhost
-  gather_facts: no
   vars_files:
     - inventario/vars_aws.yml
     - inventario/vars_vault.yml

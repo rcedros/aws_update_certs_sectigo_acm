@@ -13,4 +13,3 @@
     tags:
       Name: "{{ domain_name }}"
     region: "{{ aws_region }}"
-  "{{assumed_role.sts_user}}"

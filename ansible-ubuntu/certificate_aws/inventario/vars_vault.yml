@@ -1,3 +1,10 @@
 ---
-vault_url: "https://vaultdev.in.neoncorp.com.br:8200/"
+vault_url: "https://vault_test.com:8200/"
 vault_path: "sec-certificates/data/"
+secret_name: "certificate.com"
+url: "https://api.azionapi.net/digital_certificates" #WAF
+update_cert_id: "33139"
+headers:
+  Accept: "application/json; version=3"
+  Authorization: "Token {{ ACCESS_TOKEN }}"
+  Content-Type: "application/json"

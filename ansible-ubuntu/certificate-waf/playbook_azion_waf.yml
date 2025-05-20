@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+
+# #######################  RESGATANDO CERTIFICADO NO VAULT E CONFIGURANDO  ############################
+
+    - name: "Vault login"
+      community.hashi_vault.vault_read:
+        url: "https://vault.com.br:8200/"
+        path: "{{vault_path}}{{ secret_name }}"
+        auth_method: ldap
+        username: "{{ vault_user }}"
+        password: "{{ vault_password }}"
+      become: no
+      delegate_to: localhost
+      register: secret
+      #no_log: true
+
+    - name: Import new certificate request
+      uri:
+        url: "{{ url }}"
+        method: POST
+        headers: "{{ headers }}"
+        body_format: json
+        body:
+          name: "{{ secret_name }}"
+          certificate: "{{ secret.data.data.data.public_key }}"
+          private_key: "{{ secret.data.data.data.private_key }}"
+      register: response
+      failed_when: response.status != 201
+      timeout: 30
+      
+    - name: Update new certificate request
+      uri:
+        url: "{{ url }}/{{ update_cert_id }}"
+        method: PUT
+        headers: "{{ headers }}"
+        body_format: json
+        body:
+          name: "{{ secret_name }}__2024"
+          certificate: "{{ secret.data.data.data.public_key }}"
+          private_key: "{{ secret.data.data.data.private_key }}"
+      register: response
+      failed_when: response.status != 201
+      timeout: 30

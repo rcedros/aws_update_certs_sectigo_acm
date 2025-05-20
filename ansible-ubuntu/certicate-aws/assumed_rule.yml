@@ -1,9 +1,0 @@
----
-- name: Assume role
-  community.aws.sts_assume_role:
-    role_arn: "{{ item }}"
-    region: "{{ aws_region }}"
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    role_session_name: "{{ role_session_name }}"
-  register: assumed_role
